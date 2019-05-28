@@ -1,5 +1,7 @@
 # Name.com PHP API
 
+Enables access to Name.com's API using PHP and Composer. 
+
 ## Creating a new construct
 `````
 $name = new NameDotComApi('username', 'api-key-api-key-api-key-api-key-api-key');
@@ -7,7 +9,7 @@ $domains = $name->getDomainList();
 print_r($domains);
 `````
 
-## Apis
+## API Functions
 
 ### Hello
  - HelloFunc()
