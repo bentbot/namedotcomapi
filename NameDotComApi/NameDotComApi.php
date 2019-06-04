@@ -2,19 +2,20 @@
 
 /**
  * Name.com PHP API Class
- * Class that handles all name.com Partnership
+ * Class that handles all Name.com API Calls
  *
- * @author rama@networks.co.id
+ * 2019
+ * @author liam@hogan.re
  */
 
-require_once(dirname(__FILE__).'/Requests-master/library/Requests.php');
+require_once(dirname(__FILE__).'/../vendor/autoload.php');
 
 Requests::register_autoloader();
 
 class NameDotComApi
 {
 	private $session_token;
-	public $url = 'https://api.dev.name.com';
+	public $url = 'https://api.name.com';
 	public $data;
 
 	public function __construct($username, $api_token)
@@ -26,10 +27,9 @@ class NameDotComApi
 	}
 
 
-
-
 	/****
-	** HelloFunc
+	* Name.com API 
+	* HelloFunc
 	****/
 
 	/**
