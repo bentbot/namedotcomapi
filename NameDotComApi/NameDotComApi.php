@@ -2,34 +2,44 @@
 
 /**
  * Name.com PHP API Class
- * Class that handles all name.com Partnership
+ * Class that handles all Name.com API Calls
  *
- * @author rama@networks.co.id
+ * 2019
+ * @author liam@hogan.re
  */
 
-require_once(dirname(__FILE__).'/Requests-master/library/Requests.php');
+require_once(dirname(__FILE__).'/../vendor/autoload.php');
 
 Requests::register_autoloader();
 
 class NameDotComApi
 {
+	private $username;
 	private $session_token;
-	public $url = 'https://api.dev.name.com';
+	public $url = 'https://api.name.com/';
+	public $version = 'v4';
 	public $data;
 
 	public function __construct($username, $api_token)
 	{
+		$this->username = $username;
 		$post = array('username' => $username, 'api_token' => $api_token);
-		$request = Requests::post($this->url . '/api/login', array(), json_encode($post));
+		$request = Requests::post($this->url . '/login', array(), json_encode($post));
+		
 		$data = json_decode($request->body, TRUE);
+		$result = $data['result'];
+		if ( !$result ) echo 'Name.com connection error: '; print_r( $data );
+
+		$this->data = 'Name.com Connection '.$result['message'].".\n";
 		$this->session_token = $data['session_token'];
+		$this->url = $this->url.$this->version;
+
 	}
 
 
-
-
 	/****
-	** HelloFunc
+	* Name.com API 
+	* HelloFunc
 	****/
 
 	/**
@@ -42,7 +52,7 @@ class NameDotComApi
      */
 	public function HelloFunc()
 	{
-		$request = Requests::get($this->url . '/api/hello/'.$hostname, array('Api-Session-Token' => $this->session_token));
+		$request = Requests::get($this->url . '/hello/'.$hostname, array('Api-Session-Token' => $this->session_token));
 		$data = json_decode($request->body, TRUE);	
 		return $data;
 	}
@@ -187,9 +197,11 @@ class NameDotComApi
      */
 	public function getDomainList()
 	{
-		$request = Requests::get($this->url . '/api/domain/list', array('Api-Session-Token' => $this->session_token));
+		$request = Requests::get($this->url . '/domain/list', array('Api-Session-Token' => $this->session_token));
 		$data = json_decode($request->body, TRUE);	
-		return $data['domains'];
+		
+		if ( isset($data['domains']) ) return $data['domains'];
+		if (!isset($data['domains']) ) print_r($data); return 0;
 	}
 
 
@@ -205,7 +217,7 @@ class NameDotComApi
 	public function checkDomain($keyword)
 	{	
 		$post = array('keyword' => $keyword, 'tlds' => array('com','org','me'), 'services' => array('availability'));
-		$request = Requests::post($this->url . '/api/domain/check', array(), json_encode($post));
+		$request = Requests::post($this->url . '/domain/check', array(), json_encode($post));
 		$data = json_decode($request->body, TRUE);
 		return array_map(array($this, "__processPrice"), $data['domains']);
 	}
@@ -328,9 +340,16 @@ class NameDotComApi
      */
 	public function ListVanityNameservers( $domain )
 	{
-		$request = Requests::get($this->url . '/api/domains/'.$domain.'/vanity_nameservers', array('Api-Session-Token' => $this->session_token));
-		$data = json_decode($request->body, TRUE);	
-		return $data['vanityNameservers'];
+		$header  = array( 'Accept' => 'application/json' );
+		$options = array( 'auth' => array( $this->username, $this->session_token ));
+		$path = $this->url.'/domains/'.$domain.'/vanity_nameservers';
+		$request = Requests::get($path, $header, $options);
+		
+		$data = json_decode($request->body, TRUE);
+
+		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
+		if (!isset($data['vanityNameservers']) ) print_r($data); return 0;
+
 	}
 
 	/**
@@ -342,9 +361,16 @@ class NameDotComApi
      */
 	public function GetVanityNameserver( $domain, $hostname )
 	{
-		$request = Requests::get($this->url . '/api/domains/'.$domain.'/vanity_nameservers/'.$hostname, array('Api-Session-Token' => $this->session_token));
+
+		$header  = array( 'Accept' => 'application/json' );
+		$options = array( 'auth' => array( $this->username, $this->session_token ));
+		$path = $this->url.'/domains/'.$domain.'/vanity_nameservers/'.$hostname;
+		$request = Requests::get($path, $header, $options);
+		
 		$data = json_decode($request->body, TRUE);	
-		return $data['ips'];
+
+		if ( isset($data['ips']) ) return $data['ips'];
+		if (!isset($data['ips']) ) print_r($data); return 0;
 	}
 
 	/**
@@ -362,10 +388,13 @@ class NameDotComApi
 			'ips' => (is_array($ips))?$ips:[$ips]
 		);
 
-		$request = Requests::post($this->url . '/api/domains/'.$domain.'/vanity_nameservers', array('Api-Session-Token' => $this->session_token), json_encode($post));
+		$request = Requests::post($this->url . '/domains/'.$domain.'/vanity_nameservers', array('Api-Session-Token' => $this->session_token), json_encode($post));
 
 		$data = json_decode($request->body, TRUE);	
 		return $data;
+
+		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
+		if (!isset($data['vanityNameservers']) ) print_r($data); return 0;
 	}
 
 	/**
@@ -382,10 +411,13 @@ class NameDotComApi
 			'ips' => (is_array($ips))?$ips:[$ips]
 		);
 
-		$request = Requests::post($this->url . '/api/domains/'.$domain.'/vanity_nameservers/'.$hostname, array('Api-Session-Token' => $this->session_token), json_encode($post));
+		$request = Requests::post($this->url . '/domains/'.$domain.'/vanity_nameservers/'.$hostname, array('Api-Session-Token' => $this->session_token), json_encode($post));
 
 		$data = json_decode($request->body, TRUE);	
 		return $data;
+
+		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
+		if (!isset($data['vanityNameservers']) ) print_r($data); return 0;
 	}
 
 
@@ -399,10 +431,13 @@ class NameDotComApi
 	public function DeleteVanityNameserver( $domain, $hostname )
 	{
 
-		$request = Requests::delete($this->url . '/api/domains/'.$domain.'/vanity_nameservers/'.$hostname, array('Api-Session-Token' => $this->session_token));
+		$request = Requests::delete($this->url . '/domains/'.$domain.'/vanity_nameservers/'.$hostname, array('Api-Session-Token' => $this->session_token));
 
 		$data = json_decode($request->body, TRUE);	
 		return $data;
+
+		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
+		if (!isset($data['vanityNameservers']) ) print_r($data); return 0;
 	}
 
 
