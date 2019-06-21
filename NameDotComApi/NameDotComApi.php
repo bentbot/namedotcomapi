@@ -221,7 +221,7 @@ class NameDotComApi {
 		$data = json_decode($request->body, TRUE);	
 		
 		if ( isset($data['domains']) ) return $data['domains'];
-		if (!isset($data['domains']) ) print_r($data); return 0;
+		if (!isset($data['domains']) ) {print_r($data); return false;}
 	}
 
 
@@ -365,7 +365,7 @@ class NameDotComApi {
 		
 		$data = json_decode($request->body, TRUE);
 		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
-		if (!isset($data['vanityNameservers']) ) print_r($data); return 0;
+		if (!isset($data['vanityNameservers']) ) {print_r($data); return false;}
 	}
 
 	/**
@@ -383,7 +383,7 @@ class NameDotComApi {
 
 		$data = json_decode($request->body, TRUE);	
 		if ( isset($data['ips']) ) return $data['ips'];
-		if (!isset($data['ips']) ) print_r($data); return 0;
+		if (!isset($data['ips']) ) {print_r($data); return false;}
 	}
 
 	/**
