@@ -12,35 +12,52 @@ require_once(dirname(__FILE__).'/../vendor/autoload.php');
 
 Requests::register_autoloader();
 
-class NameDotComApi
-{
+class NameDotComApi {
+
+	private $options;
 	private $username;
 	private $session_token;
 	public $url = 'https://api.name.com/';
 	public $version = 'v4';
 	public $data;
+	public $header;
+	public $connected;
 
-	public function __construct($username, $api_token)
-	{
+	public function __construct($username, $api_token, $v = 0 ) {
+
 		$this->username = $username;
-		$post = array('username' => $username, 'api_token' => $api_token);
-		$request = Requests::post($this->url . '/login', array(), json_encode($post));
-		
-		$data = json_decode($request->body, TRUE);
-		$result = $data['result'];
-		if ( !$result ) echo 'Name.com connection error: '; print_r( $data );
-
-		$this->data = 'Name.com Connection '.$result['message'].".\n";
-		$this->session_token = $data['session_token'];
+		$this->session_token = $api_token;
+		$this->header  = array( 'Accept' => 'application/json' );
+		$this->options = array( 'auth' => array( $this->username, $this->session_token ));
 		$this->url = $this->url.$this->version;
+
+		if ( !$this->connected ) {
+			$path = $this->url.'/hello/';
+			$request = Requests::get($path, $this->header, $this->options);
+			
+			$data = json_decode($request->body, TRUE);
+			
+			if ( !$data['username']) {
+				$this->connected = false;
+				if ( $v || !$v ) echo 'Name.com API connection error. '; 
+				if ( $v ) print_r( $request->body );
+				return $data;
+			} else {
+				$this->connected = true;
+				$result = $data['motd'];
+				if( $v ) print_r( $data );
+				$this->data = 'Name.com Connection: '.$result.".\n";
+				return $result;
+			}
+			
+			// 
+			// NAME.COM API RESTful Method Connection.
+			// 
+
+		}
 
 	}
 
-
-	/****
-	* Name.com API 
-	* HelloFunc
-	****/
 
 	/**
      * Hello
@@ -52,8 +69,11 @@ class NameDotComApi
      */
 	public function HelloFunc()
 	{
-		$request = Requests::get($this->url . '/hello/'.$hostname, array('Api-Session-Token' => $this->session_token));
-		$data = json_decode($request->body, TRUE);	
+
+		$path = $this->url.'/hello/'.$hostname;
+		$request = Requests::get($path, $this->header, $this->options);
+
+		$data = json_decode($request->body, TRUE);
 		return $data;
 	}
 
@@ -217,7 +237,7 @@ class NameDotComApi
 	public function checkDomain($keyword)
 	{	
 		$post = array('keyword' => $keyword, 'tlds' => array('com','org','me'), 'services' => array('availability'));
-		$request = Requests::post($this->url . '/domain/check', array(), json_encode($post));
+		$request = Requests::post($this->url . '/domain/check', $this->header, json_encode($post), $this->options);
 		$data = json_decode($request->body, TRUE);
 		return array_map(array($this, "__processPrice"), $data['domains']);
 	}
@@ -340,16 +360,12 @@ class NameDotComApi
      */
 	public function ListVanityNameservers( $domain )
 	{
-		$header  = array( 'Accept' => 'application/json' );
-		$options = array( 'auth' => array( $this->username, $this->session_token ));
 		$path = $this->url.'/domains/'.$domain.'/vanity_nameservers';
-		$request = Requests::get($path, $header, $options);
+		$request = Requests::get($path, $this->header, $this->options);
 		
 		$data = json_decode($request->body, TRUE);
-
 		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
 		if (!isset($data['vanityNameservers']) ) print_r($data); return 0;
-
 	}
 
 	/**
@@ -362,13 +378,10 @@ class NameDotComApi
 	public function GetVanityNameserver( $domain, $hostname )
 	{
 
-		$header  = array( 'Accept' => 'application/json' );
-		$options = array( 'auth' => array( $this->username, $this->session_token ));
 		$path = $this->url.'/domains/'.$domain.'/vanity_nameservers/'.$hostname;
-		$request = Requests::get($path, $header, $options);
-		
-		$data = json_decode($request->body, TRUE);	
+		$request = Requests::get($path, $this->header, $this->options);
 
+		$data = json_decode($request->body, TRUE);	
 		if ( isset($data['ips']) ) return $data['ips'];
 		if (!isset($data['ips']) ) print_r($data); return 0;
 	}
@@ -382,19 +395,17 @@ class NameDotComApi
      */
 	public function CreateVanityNameserver( $domain, $hostname, $ips )
 	{
-
+		
 		$post = array(
 			'hostname' => $hostname, 
 			'ips' => (is_array($ips))?$ips:[$ips]
 		);
 
-		$request = Requests::post($this->url . '/domains/'.$domain.'/vanity_nameservers', array('Api-Session-Token' => $this->session_token), json_encode($post));
-
+		$path = $this->url . '/domains/'.$domain.'/vanity_nameservers';
+		$request = Requests::post($path, $this->header, json_encode($post), $this->options);
 		$data = json_decode($request->body, TRUE);	
 		return $data;
 
-		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
-		if (!isset($data['vanityNameservers']) ) print_r($data); return 0;
 	}
 
 	/**
@@ -407,23 +418,18 @@ class NameDotComApi
 	public function UpdateVanityNameserver( $domain, $hostname, $ips )
 	{
 
-		$post = array(
-			'ips' => (is_array($ips))?$ips:[$ips]
-		);
-
-		$request = Requests::post($this->url . '/domains/'.$domain.'/vanity_nameservers/'.$hostname, array('Api-Session-Token' => $this->session_token), json_encode($post));
-
-		$data = json_decode($request->body, TRUE);	
+		$post = array( 'ips' => (is_array($ips))?$ips:array($ips) );
+		$path = $this->url.'/domains/'.$domain.'/vanity_nameservers/'.$hostname;
+		$request = Requests::post($path, $this->header, json_encode($post), $this->options);
+		$data = json_decode($request->body, TRUE);
 		return $data;
 
-		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
-		if (!isset($data['vanityNameservers']) ) print_r($data); return 0;
 	}
 
 
 	/**
      * Delete Vanity Nameserver
-     * remove a nameserver from the root account
+     * remove nameserver IPs from the domain name specified. 
      *
      * @return object null
      * @author liam@hogan.re
@@ -431,13 +437,11 @@ class NameDotComApi
 	public function DeleteVanityNameserver( $domain, $hostname )
 	{
 
-		$request = Requests::delete($this->url . '/domains/'.$domain.'/vanity_nameservers/'.$hostname, array('Api-Session-Token' => $this->session_token));
-
-		$data = json_decode($request->body, TRUE);	
+		$path = $this->url.'/domains/'.$domain.'/vanity_nameservers/'.$hostname;
+		$request = Requests::delete($path, $this->header, $this->options);
+		$data = json_decode($request->body, TRUE);
 		return $data;
 
-		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
-		if (!isset($data['vanityNameservers']) ) print_r($data); return 0;
 	}
 
 
