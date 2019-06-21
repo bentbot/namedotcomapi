@@ -418,9 +418,10 @@ class NameDotComApi {
 	public function UpdateVanityNameserver( $domain, $hostname, $ips )
 	{
 
-		$post = array( 'ips' => (is_array($ips))?$ips:array($ips) );
+		$post = array( 'ips' => (is_array($ips))?$ips:[$ips] );
 		$path = $this->url.'/domains/'.$domain.'/vanity_nameservers/'.$hostname;
-		$request = Requests::post($path, $this->header, json_encode($post), $this->options);
+
+		$request = Requests::put($path, $this->header, json_encode($post), $this->options);
 		$data = json_decode($request->body, TRUE);
 		return $data;
 
@@ -443,9 +444,6 @@ class NameDotComApi {
 		return $data;
 
 	}
-
-
-
 
 
 
