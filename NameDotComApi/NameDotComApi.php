@@ -1274,32 +1274,36 @@ class NameDotComApi {
      * ListVanityNameservers
      * lists all nameservers registered with the registry. It omits the IP addresses from the response. Those can be found from calling GetVanityNameserver.
      *
+	 * @param int32 $perPage 		
+	 * Per Page is the number of records to return per request. Per Page defaults to 1,000.
+	 * @param int32 $page 			
+	 * Page is which page to return
+	 * @param string $domainName
      * @return array $nameservers
+     * * *
      * @author liam@hogan.re
      */
-	public function ListVanityNameservers( $domainName )
+	public function ListVanityNameservers( $domainName, $perPage=1000, $page )
 	{
-		$path = $this->url.'/domains/'.$domainName.'/vanity_nameservers';
+		$query = '?perPage='$perPage.'&page='.$page;
+		$path = $this->url.'/domains/'.$domainName.'/vanity_nameservers'.$query;
 		$request = Requests::get($path, $this->header, $this->options);
-		
-		$data = json_decode($request->body, TRUE);
-		if ( isset($data['vanityNameservers']) ) return $data['vanityNameservers'];
-		if (!isset($data['vanityNameservers']) ) {print_r($data); return false;}
+		return json_decode($request->body, TRUE);
 	}
 
 	/**
      * GetVanityNameserver
-     * get nameserver IP addresses for domain.tld, ns.domain.tld
+     * gets the details for a vanity nameserver registered with the registry.
      *
-     * @return array $ips
+     * @param string $domainName DomainName is the domain to for the vanity nameserver.
+     * @param string $hostname 	Hostname is the hostname for the vanity nameserver.
+     * * *
      * @author liam@hogan.re
      */
 	public function GetVanityNameserver( $domainName, $hostname )
 	{
-
 		$path = $this->url.'/domains/'.$domainName.'/vanity_nameservers/'.$hostname;
 		$request = Requests::get($path, $this->header, $this->options);
-
 		$data = json_decode($request->body, TRUE);	
 		if ( isset($data['ips']) ) return $data['ips'];
 		if (!isset($data['ips']) ) {print_r($data); return false;}
@@ -1307,9 +1311,12 @@ class NameDotComApi {
 
 	/**
      * CreateVanityNameserver
-     * add a new nameserver record
+     * registers a nameserver with the registry.
      *
-     * @return object $nameserver
+     * @param string $domainName 	DomainName is the domain to for the vanity nameserver.
+     * @param string $hostname 		Hostname is the hostname for the vanity nameserver.
+     * @param []string $ips 		IPs is a list of IP addresses that are used for glue records for this nameserver.
+     * * *
      * @author liam@hogan.re
      */
 	public function CreateVanityNameserver( $domainName, $hostname, $ips )
@@ -1326,9 +1333,12 @@ class NameDotComApi {
 
 	/**
      * UpdateVanityNameserver
-     * update the nameserver details
+     * allows you to update the glue record IP addresses at the registry.
      *
-     * @return object $nameserver
+     * @param string 	$domainName 	DomainName is the domain to for the vanity nameserver.
+     * @param string 	$hostname 		Hostname is the hostname for the vanity nameserver.
+     * @param []string 	$ips 		IPs is a list of IP addresses that are used for glue records for this nameserver.
+     * * *
      * @author liam@hogan.re
      */
 	public function UpdateVanityNameserver( $domainName, $hostname, $ips )
@@ -1343,23 +1353,23 @@ class NameDotComApi {
 
 	/**
      * DeleteVanityNameserver
-     * remove nameserver IPs from the domain name specified. 
+     *  unregisteres the nameserver at the registry. This might fail if the registry believes the nameserver is in use.
      *
-     * @return object null
+     * @param string 	$domainName 	DomainName is the domain of the vanity nameserver to delete.
+     * @param string 	$hostname 		Hostname is the hostname of the vanity nameserver to delete.
+     * * *
      * @author liam@hogan.re
      */
 	public function DeleteVanityNameserver( $domainName, $hostname )
 	{
-
 		$path = $this->url.'/domains/'.$domainName.'/vanity_nameservers/'.$hostname;
 		$request = Requests::delete($path, $this->header, $this->options);
 		$data = json_decode($request->body, TRUE);
 		return $data;
-
 	}
 
 
-	//Unattended Functions
+	// Unattended Functions
 
 
    /**
