@@ -133,7 +133,7 @@ class NameDotComApi {
 	* * * 
 	* @author liam@hogan.re
 	*/
-	public function ListRecords($domainName, $perPage, $page) {
+	public function ListRecords($domainName, $perPage, $page) 
 	{
 		$post = '?domainName='.$domainName.'&perPage='.$perPage.'&page='.$page;
 		$request = Requests::get($this->url.'/domains/'.$domainName.'/records'.$post, $this->header, $this->options);
@@ -151,7 +151,7 @@ class NameDotComApi {
 	* * * 
 	* @author liam@hogan.re
 	*/
-	public function GetRecord($domainName, $id) {
+	public function GetRecord($domainName, $id) 
 	{
 		$request = Requests::get($this->url.'/domains/'.$domainName.'/records/'.$id, $this->header, $this->options);
 		return json_decode($request->body, TRUE);
@@ -180,7 +180,7 @@ class NameDotComApi {
 	* * * 
 	* @author liam@hogan.re
 	*/
-	public function CreateRecord($domainName, $id, $host, $fqdn, $type, $answer, $ttl, $priority) {
+	public function CreateRecord($domainName, $id, $host, $fqdn, $type, $answer, $ttl, $priority) 
 	{
 		$post = array(
 			'domainName' => $domainName, 
@@ -218,7 +218,7 @@ class NameDotComApi {
 	* * * 
 	* @author liam@hogan.re
 	*/
-	public function UpdateRecord($id, $domainName, $host, $fqdn, $type, $answer, $ttl, $priority) {
+	public function UpdateRecord($id, $domainName, $host, $fqdn, $type, $answer, $ttl, $priority) 
 	{
 		$post = array(
 			'domainName' => $domainName, 
@@ -245,7 +245,7 @@ class NameDotComApi {
 	* * * 
 	* @author liam@hogan.re
 	*/
-	public function DeleteRecord($domainName, $id) {
+	public function DeleteRecord($domainName, $id) 
 	{
 		$post = array(
 			'domainName' => $domainName, 
@@ -257,7 +257,7 @@ class NameDotComApi {
 			'$ttl' => $ttl,
 			'priority' => $priority
 		);
-		$request = Requests::delete($this->url.'/domains/'.$domainName.'/records/'.$id, $this->header $this->options);
+		$request = Requests::delete($this->url.'/domains/'.$domainName.'/records/'.$id, $this->header, $this->options);
 		return json_decode($request->body, TRUE);
 	}
 
@@ -384,7 +384,7 @@ class NameDotComApi {
 			'$ttl' => $ttl,
 			'priority' => $priority
 		);
-		$request = Requests::delete($this->url.'/domains/'.$domainName.'/dnssec/'.$digest, $this->header $this->options);
+		$request = Requests::delete($this->url.'/domains/'.$domainName.'/dnssec/'.$digest, $this->header, $this->options);
 		return json_decode($request->body, TRUE);
 	}
 
@@ -493,7 +493,7 @@ class NameDotComApi {
 	public function getDomainList() { return $this->ListDomains(); }
 	public function ListDomains( $perPage=1000, $page=0 )
 	{
-		$query = '?perPage='$perPage.'&page='.$page;
+		$query = '?perPage='.$perPage.'&page='.$page;
 		$request = Requests::get($this->url . '/domains'.$query, $this->header, $this->options);
 		return json_decode($request->body, TRUE);	
 	}
@@ -570,7 +570,7 @@ class NameDotComApi {
 	* * *
 	* @author liam@hogan.re
 	*/
-	public function EnableWhoisPrivacy( $domainName )
+	public function DisableWhoisPrivacy( $domainName )
 	{
 		$path = $this->url.'/domains/'.$domainName.':disableWhoisPrivacy';
 		$request = Requests::post($path, $this->header, json_encode([]), $this->options);
@@ -589,22 +589,6 @@ class NameDotComApi {
 	public function EnableAutorenew( $domainName )
 	{
 		$path = $this->url.'/domains/'.$domainName.':enableAutorenew';
-		$request = Requests::post($path, $this->header, json_encode([]), $this->options);
-		return json_decode($request->body, TRUE);
-	}
-
-	/**
-	* DisableAutorenew
-	* enables the domain to be automatically renewed when it gets close to expiring.
-	*
-	* @param string $domainName 
-	* DomainName is the domain name to disable autorenew for.
-	* * *
-	* @author liam@hogan.re
-	*/
-	public function DisableAutorenew( $domainName )
-	{
-		$path = $this->url.'/domains/'.$domainName.':disableAutorenew';
 		$request = Requests::post($path, $this->header, json_encode([]), $this->options);
 		return json_decode($request->body, TRUE);
 	}
@@ -806,10 +790,10 @@ class NameDotComApi {
 	public function Search( $timeout=1000, $keyword, $tldFilter, $promoCode )
 	{
 		$post = array(
-			'timeout' = $timeout,
-			'keyword' = $keyword,
-			'tldFilter' = $tldFilter,
-			'promoCode' = $promoCode
+			'timeout' => $timeout,
+			'keyword' => $keyword,
+			'tldFilter' => $tldFilter,
+			'promoCode' => $promoCode
 		);
 		$path = $this->url.'/domains/'.$domainName.':search';
 		$request = Requests::post($path, $this->header, json_encode($post), $this->options);
@@ -834,10 +818,10 @@ class NameDotComApi {
 	public function SearchStream( $timeout=1000, $keyword, $tldFilter, $promoCode )
 	{
 		$post = array(
-			'timeout' = $timeout,
-			'keyword' = $keyword,
-			'tldFilter' = $tldFilter,
-			'promoCode' = $promoCode
+			'timeout' => $timeout,
+			'keyword' => $keyword,
+			'tldFilter' => $tldFilter,
+			'promoCode' => $promoCode
 		);
 		$path = $this->url.'/domains/'.$domainName.':searchStream';
 		$request = Requests::post($path, $this->header, json_encode($post), $this->options);
@@ -888,7 +872,7 @@ class NameDotComApi {
 	*/
 	public function ListEmailForwardings( $domainName, $perPage=1000, $page )
 	{
-		$query = '?perPage='$perPage.'&page='.$page;
+		$query = '?perPage='.$perPage.'&page='.$page;
 		$request = Requests::get($this->url . '/domains/'.$domainName.'/email/forwarding'.$query, $this->header, $this->options);
 		return json_decode($request->body, TRUE);
 	}
@@ -906,7 +890,7 @@ class NameDotComApi {
 	*/
 	public function GetEmailForwarding( $domainName, $emailBox )
 	{
-		$request = Requests::get($this->url . '/domains/'.$domainName.'/email/forwarding/'.$emailBox, $this->header, $this->options);
+		$request = Requests::get($this->url.'/domains/'.$domainName.'/email/forwarding/'.$emailBox, $this->header, $this->options);
 		return json_decode($request->body, TRUE);
 	}
 
@@ -1014,7 +998,7 @@ class NameDotComApi {
 	*/
 	public function ListTransfers( $perPage=1000, $page=0 )
 	{
-		$query = '?perPage='$perPage.'&page='.$page;
+		$query = '?perPage='.$perPage.'&page='.$page;
 		$request = Requests::get($this->url . '/domains'.$query, $this->header, $this->options);
 		return json_decode($request->body, TRUE);	
 	}
@@ -1050,7 +1034,7 @@ class NameDotComApi {
 	* * *
 	* @author liam@hogan.re
 	*/
-	public function CreateDomain( $domainName, $authCode, $privacyEnabled, $purchasePrice, $promoCode )
+	public function CreateTransfer( $domainName, $authCode, $privacyEnabled, $purchasePrice, $promoCode )
 	{
 		$post = array(
 			'domainName' => $domainName,
@@ -1072,7 +1056,7 @@ class NameDotComApi {
 	* * *
 	* @author liam@hogan.re
 	*/
-	public function CreateDomain( $domainName )
+	public function CancelTransfer( $domainName )
 	{
 		$request = Requests::post($this->url.'/transfers/'.$domainName.':cancel', $this->header, json_encode([]), $this->options);
 		return json_decode($request->body, TRUE);
@@ -1126,7 +1110,7 @@ class NameDotComApi {
      */
 	public function ListURLForwardings( $domainName, $perPage = 1000, $page )
 	{
-		$query = '?perPage='$perPage.'&page='.$page;
+		$query = '?perPage='.$perPage.'&page='.$page;
 		$request = Requests::get($this->url.'/domains/'.$domainName.'/url/forwarding/'.$query, $this->header, $this->options);
 		return json_decode($request->body, TRUE);
 	}
@@ -1142,9 +1126,9 @@ class NameDotComApi {
 	 * * *
      * @author liam@hogan.re
      */
-	public function ListURLForwardings( $domainName, $host )
+	public function GetURLForwarding( $domainName, $host )
 	{
-		$query = '?perPage='$perPage.'&page='.$page;
+		$query = '?perPage='.$perPage.'&page='.$page;
 		$request = Requests::get($this->url.'/domains/'.$domainName.'/url/forwarding/'.$host, $this->header, $this->options);
 		return json_decode($request->body, TRUE);
 	}
@@ -1168,7 +1152,7 @@ class NameDotComApi {
 	 * * *
      * @author liam@hogan.re
      */
-	public function ListURLForwardings( $domainName, $host, $forwardsTo, $type, $title, $meta )
+	public function CreateURLForwarding( $domainName, $host, $forwardsTo, $type, $title, $meta )
 	{
 		$post = array(
 			'host' => $host,
@@ -1200,7 +1184,7 @@ class NameDotComApi {
 	 * * *
      * @author liam@hogan.re
      */
-	public function ListURLForwardings( $domainName, $host, $forwardsTo, $type, $title, $meta )
+	public function UpdateURLForwarding( $domainName, $host, $forwardsTo, $type, $title, $meta )
 	{
 		$post = array(
 			'host' => $host,
@@ -1225,16 +1209,9 @@ class NameDotComApi {
 	 * * *
      * @author liam@hogan.re
      */
-	public function ListURLForwardings( $domainName, $host, $forwardsTo, $type, $title, $meta )
+	public function DeleteURLForwarding( $domainName, $host )
 	{
-		$post = array(
-			'host' => $host,
-			'forwardsTo' => $forwardsTo,
-			'type' => $type,
-			'title' => $title,
-			'meta' => $meta
-		);
-		$request = Requests::put($this->url.'/domains/'.$domainName.'/url/forwarding/'.$host, $this->header, json_encode($post), $this->options);
+		$request = Requests::delete($this->url.'/domains/'.$domainName.'/url/forwarding/'.$host, $this->header, $this->options);
 		return json_decode($request->body, TRUE);
 	}
 
@@ -1285,7 +1262,7 @@ class NameDotComApi {
      */
 	public function ListVanityNameservers( $domainName, $perPage=1000, $page )
 	{
-		$query = '?perPage='$perPage.'&page='.$page;
+		$query = '?perPage='.$perPage.'&page='.$page;
 		$path = $this->url.'/domains/'.$domainName.'/vanity_nameservers'.$query;
 		$request = Requests::get($path, $this->header, $this->options);
 		return json_decode($request->body, TRUE);
